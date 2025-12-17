@@ -637,19 +637,15 @@ export async function POST(request: Request) {
 
           // Remove Vorg badge for paid plans
           if (isPaidPlan) {
-            // Remove the badge wrapper div and everything inside it
+            // Remove the entire badge section - from comment to closing script tag
+            // This matches: <!-- VORG BADGE (Required) --> ... </script>
             generatedHTML = generatedHTML.replace(
-              /<div id="vorg-badge-wrapper"[\s\S]*?<\/div>\s*<style>[\s\S]*?<\/style>\s*<script>[\s\S]*?<\/script>/gi,
+              /<!--\s*VORG BADGE[\s\S]*?<\/script>\s*(?=\n)/gi,
               ''
             )
-            // Also remove any standalone badge references
+            // Also try alternative format with "Made with Vorg Badge" comment
             generatedHTML = generatedHTML.replace(
-              /<!--\s*VORG BADGE[\s\S]*?-->/gi,
-              ''
-            )
-            // Remove the Made with Vorg Badge comment
-            generatedHTML = generatedHTML.replace(
-              /<!--\s*Made with Vorg Badge\s*-->[\s\S]*?(?=<script>|<\/body>)/gi,
+              /<!--\s*Made with Vorg Badge\s*-->[\s\S]*?<\/script>\s*(?=\n)/gi,
               ''
             )
           }
