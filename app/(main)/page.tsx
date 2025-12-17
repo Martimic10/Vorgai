@@ -109,19 +109,21 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-screen md:overflow-hidden overflow-y-auto">
+    <>
       {/* Background Effects */}
-      <div className="fixed inset-0 bg-background -z-10">
+      <div className="fixed inset-0 bg-background">
         <StarsBackground />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/50" />
       </div>
 
-      {/* Navigation */}
-      <Navbar />
+      {/* Scrollable Content Wrapper */}
+      <div className="relative min-h-screen md:overflow-hidden overflow-y-auto">
+        {/* Navigation */}
+        <Navbar />
 
-      {/* Main Content */}
-      <main className="relative z-10 flex flex-col items-center md:justify-center justify-start px-4 md:pt-16 pt-24 md:pb-32 pb-12 md:h-screen min-h-screen">
-        <div className="w-full max-w-4xl mx-auto text-center space-y-12">
+        {/* Main Content */}
+        <main className="relative z-10 flex flex-col items-center md:justify-center justify-start px-4 md:pt-16 pt-24 md:pb-32 pb-12 md:h-screen min-h-screen">
+          <div className="w-full max-w-4xl mx-auto text-center space-y-12">
           {/* Hero Section */}
           <div className="space-y-6">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
@@ -280,6 +282,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   )
 }
