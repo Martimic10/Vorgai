@@ -2,8 +2,8 @@ import Link from 'next/link'
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <main className="relative z-10 min-h-screen py-24">
+    <div className="min-h-screen bg-black text-white overflow-y-auto">
+      <main className="relative z-10 min-h-screen py-24 pb-32">
         <div className="w-full max-w-4xl mx-auto px-4">
           <Link
             href="/"

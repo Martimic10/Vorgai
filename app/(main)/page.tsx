@@ -120,7 +120,7 @@ export default function Home() {
       <Navbar />
 
       {/* Main Content */}
-      <main className="relative z-10 flex h-screen flex-col items-center justify-center px-4 pt-16 pb-24">
+      <main className="relative z-10 flex min-h-screen flex-col items-center justify-start px-4 pt-24 pb-48 overflow-y-auto">
         <div className="w-full max-w-4xl mx-auto text-center space-y-12">
           {/* Hero Section */}
           <div className="space-y-6">
@@ -214,7 +214,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 z-10 py-3 md:py-6">
+      <footer className="relative z-10 py-6 md:py-8 mt-auto">
         <div className="container-centered">
           <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-4">
             {/* Left side - Legal links */}
