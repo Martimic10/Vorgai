@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Storage</title>
+</head>
+<body style="background: black; color: white; padding: 40px; font-family: monospace;">
+    <h1>Clearing Browser Storage...</h1>
+    <div id="status">Working...</div>
+    <script>
+        try {
+            // Clear localStorage
+            localStorage.clear();
+            
+            // Clear sessionStorage
+            sessionStorage.clear();
+            
+            // Clear all cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            document.getElementById('status').innerHTML = 
+                '<h2 style="color: lime;">✓ Storage cleared successfully!</h2>' +
+                '<p>Refresh your browser or <a href="/" style="color: cyan;">click here to go home</a></p>';
+        } catch (e) {
+            document.getElementById('status').innerHTML = 
+                '<h2 style="color: red;">Error: ' + e.message + '</h2>';
+        }
+    </script>
+</body>
+</html>

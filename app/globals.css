@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark mode (default) */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --bg-primary: 0 0% 0%;
+    --bg-secondary: 0 0% 10.2%;
+    --bg-tertiary: 0 0% 16.5%;
+    --text-primary: 0 0% 100%;
+    --text-secondary: 0 0% 63.1%;
+    --text-tertiary: 0 0% 45%;
+    --border: 0 0% 12.5%;
+    --border-color: 0 0% 12.5%;
+    --border-hover: 0 0% 25%;
+    --hover-bg: 0 0% 20%;
+  }
+
+  html.light {
+    /* Light mode */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
+    --bg-primary: 0 0% 100%;
+    --bg-secondary: 0 0% 100%;
+    --bg-tertiary: 0 0% 97%;
+    --text-primary: 0 0% 5%;
+    --text-secondary: 0 0% 35%;
+    --text-tertiary: 0 0% 55%;
+    --border: 0 0% 88%;
+    --border-color: 0 0% 88%;
+    --border-hover: 0 0% 70%;
+    --hover-bg: 0 0% 94%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    background-color: black;
+  }
+
+  html.light {
+    background-color: white;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .container-centered {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Remove container constraints for full-width pages */
+  .no-container {
+    @apply m-0 p-0 max-w-none;
+  }
+
+  /* Custom animations */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Backdrop blur enhancement */
+  .backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent;
+  }
+
+  /* Shooting star animations */
+  @keyframes shoot {
+    0% {
+      transform: translateX(0) translateY(0) rotate(-45deg);
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      /* Travel across entire viewport - much bigger distance */
+      transform: translateX(120vw) translateY(120vh) rotate(-45deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .shooting-star {
+    /* Longer tail for bigger shooting stars */
+    background: linear-gradient(to right, white, transparent);
+    box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    /* Add a longer tail effect */
+    width: 100px !important;
+    height: 3px !important;
+  }
+
+  /* Custom Scrollbar Styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #3a3a3a;
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #4a4a4a;
+  }
+}
