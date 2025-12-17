@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Check, ChevronDown, Loader2 } from 'lucide-react'
 import { StarsBackground } from '@/components/shooting-stars'
+import { getUserSubscription } from '@/lib/subscription'
 
 const plans = [
   {
@@ -77,7 +78,18 @@ const faqs = [
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      const subscription = await getUserSubscription()
+      if (subscription && subscription.plan !== 'free') {
+        setCurrentPlan(subscription.plan)
+      }
+    }
+    fetchSubscription()
+  }, [])
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index)
@@ -172,10 +184,17 @@ export default function PricingPage() {
                     : 'border-[hsl(var(--border-color))] bg-[hsl(var(--bg-secondary))] hover:border-[hsl(var(--border-hover))] hover:bg-[hsl(var(--bg-tertiary))] shadow-md'
                 }`}
               >
-                {plan.popular && (
+                {plan.popular && !currentPlan && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-semibold tracking-wide shadow-lg">
                       MOST POPULAR
+                    </span>
+                  </div>
+                )}
+                {currentPlan === plan.planKey && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-green-600 text-white px-4 py-1 rounded-full text-xs font-semibold tracking-wide shadow-lg">
+                      CURRENT PLAN
                     </span>
                   </div>
                 )}
@@ -203,7 +222,7 @@ export default function PricingPage() {
 
                 <Button
                   onClick={() => handleSubscribe(plan.planKey, plan.name)}
-                  disabled={loadingPlan === plan.name}
+                  disabled={loadingPlan === plan.name || currentPlan === plan.planKey}
                   className={`w-full h-11 rounded-lg font-medium transition-all ${
                     plan.popular
                       ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:opacity-50 disabled:cursor-not-allowed'
@@ -215,6 +234,8 @@ export default function PricingPage() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Loading...
                     </span>
+                  ) : currentPlan === plan.planKey ? (
+                    'Current Plan'
                   ) : (
                     plan.cta
                   )}
