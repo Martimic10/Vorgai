@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false)
+  const [loadingBilling, setLoadingBilling] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const avatarMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -149,6 +150,45 @@ export default function DashboardPage() {
     }
   }
 
+  const handleManageBilling = async () => {
+    try {
+      setLoadingBilling(true)
+      setIsAvatarMenuOpen(false)
+
+      const response = await fetch('/api/create-customer-portal-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          returnUrl: window.location.pathname + window.location.search
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.error || 'Failed to open billing portal'
+        console.error('Billing portal error:', errorMessage)
+        alert(`Error: ${errorMessage}`)
+        setLoadingBilling(false)
+        return
+      }
+
+      // Redirect to Stripe Customer Portal
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setLoadingBilling(false)
+        throw new Error('No portal URL returned')
+      }
+    } catch (error: any) {
+      console.error('Error opening billing portal:', error)
+      alert(`Failed to open billing portal: ${error.message}`)
+      setLoadingBilling(false)
+    }
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -275,6 +315,13 @@ export default function DashboardPage() {
                   >
                     Pricing
                   </Link>
+                  <button
+                    onClick={handleManageBilling}
+                    disabled={loadingBilling}
+                    className="w-full flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                  >
+                    {loadingBilling ? 'Loading...' : 'Manage Billing'}
+                  </button>
                   <Link
                     href="/docs"
                     onClick={() => setIsAvatarMenuOpen(false)}

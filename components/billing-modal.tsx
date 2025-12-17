@@ -63,6 +63,7 @@ const plans = [
 export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
   const [subscription, setSubscription] = useState<UserSubscription | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const [loadingPortal, setLoadingPortal] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -104,6 +105,42 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
       console.error('Checkout error:', error)
       alert(`Failed to start checkout: ${error.message}`)
       setLoadingPlan(null)
+    }
+  }
+
+  const handleManageBilling = async () => {
+    try {
+      setLoadingPortal(true)
+
+      const response = await fetch('/api/create-customer-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          returnUrl: window.location.pathname + window.location.search
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.error || 'Failed to open billing portal'
+        console.error('Billing portal error:', errorMessage)
+        alert(`Error: ${errorMessage}`)
+        setLoadingPortal(false)
+        return
+      }
+
+      // Redirect to Stripe Customer Portal
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setLoadingPortal(false)
+        throw new Error('No portal URL returned')
+      }
+    } catch (error: any) {
+      console.error('Error opening billing portal:', error)
+      alert(`Failed to open billing portal: ${error.message}`)
+      setLoadingPortal(false)
     }
   }
 
@@ -226,6 +263,36 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
                 </div>
               ))}
             </div>
+
+            {/* Manage Billing for Paid Plans */}
+            {currentPlan !== 'free' && subscription && (
+              <div className="mt-8 p-4 bg-white/5 border border-white/10 rounded-lg">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-white mb-1">
+                      Manage Your Subscription
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Cancel, downgrade, or update your payment method. Your access continues until the end of the billing period.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleManageBilling}
+                    disabled={loadingPortal}
+                    className="w-full sm:w-auto bg-white/10 text-white hover:bg-white/15 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed h-10 px-6 rounded-lg font-medium transition-all text-sm"
+                  >
+                    {loadingPortal ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading...
+                      </span>
+                    ) : (
+                      'Manage Billing'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Current Plan Info */}
             {currentPlan === 'free' && subscription && (
