@@ -19,7 +19,9 @@ export default function DashboardPage() {
   const [activeView, setActiveView] = useState<'recent' | 'all'>('recent')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const avatarMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -63,6 +65,23 @@ export default function DashboardPage() {
     window.addEventListener('focus', refreshProjects)
     return () => window.removeEventListener('focus', refreshProjects)
   }, [])
+
+  // Close avatar menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (avatarMenuRef.current && !avatarMenuRef.current.contains(event.target as Node)) {
+        setIsAvatarMenuOpen(false)
+      }
+    }
+
+    if (isAvatarMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isAvatarMenuOpen])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -208,11 +227,74 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Right: User Avatar */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <span className="text-[hsl(var(--text-primary))] text-xs font-semibold">
-              {user?.email?.[0].toUpperCase() || 'U'}
-            </span>
+          {/* Right: User Avatar with Dropdown */}
+          <div className="relative" ref={avatarMenuRef}>
+            <button
+              onClick={() => setIsAvatarMenuOpen(!isAvatarMenuOpen)}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center hover:scale-105 transition-transform"
+            >
+              <span className="text-white text-xs font-semibold">
+                {user?.email?.[0].toUpperCase() || 'U'}
+              </span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {isAvatarMenuOpen && (
+              <div className="absolute right-0 top-12 w-56 bg-[hsl(var(--bg-secondary))] border border-[hsl(var(--border-color))] rounded-xl shadow-2xl overflow-hidden">
+                <div className="py-2">
+                  {/* User Info */}
+                  <div className="px-4 py-3 border-b border-[hsl(var(--border-color))]">
+                    <p className="text-xs text-[hsl(var(--text-secondary))]">Signed in as</p>
+                    <p className="text-sm text-[hsl(var(--text-primary))] font-medium truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+
+                  {/* Menu Items */}
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsAvatarMenuOpen(false)}
+                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors font-semibold"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/projects"
+                    onClick={() => setIsAvatarMenuOpen(false)}
+                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                  >
+                    My Projects
+                  </Link>
+
+                  <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
+
+                  <Link
+                    href="/pricing"
+                    onClick={() => setIsAvatarMenuOpen(false)}
+                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                  >
+                    Pricing
+                  </Link>
+                  <Link
+                    href="/docs"
+                    onClick={() => setIsAvatarMenuOpen(false)}
+                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                  >
+                    Docs
+                  </Link>
+
+                  <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
+
+                  <Link
+                    href="/auth/signout"
+                    onClick={() => setIsAvatarMenuOpen(false)}
+                    className="flex items-center px-4 py-3 text-sm text-red-500 hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                  >
+                    Sign Out
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -127,14 +127,9 @@ export function Navbar() {
           <div className="md:hidden relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center justify-center w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all overflow-hidden"
+              className="flex items-center justify-center w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all"
             >
-              {user && !isMenuOpen ? (
-                // Show user avatar if logged in
-                <div className="w-full h-full flex items-center justify-center bg-blue-600 text-white font-semibold text-sm">
-                  {user.email?.charAt(0).toUpperCase() || 'U'}
-                </div>
-              ) : isMenuOpen ? (
+              {isMenuOpen ? (
                 <X className="w-6 h-6" />
               ) : (
                 <Plus className="w-6 h-6" />
