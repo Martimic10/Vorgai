@@ -117,12 +117,12 @@ export default function Home() {
       </div>
 
       {/* Scrollable Content Wrapper */}
-      <div className="relative min-h-screen md:overflow-hidden overflow-y-auto">
+      <div className="relative md:h-screen h-auto md:overflow-hidden overflow-y-auto">
         {/* Navigation */}
         <Navbar />
 
         {/* Main Content */}
-        <main className="relative z-10 flex flex-col items-center md:justify-center justify-start px-4 md:pt-16 pt-24 md:pb-32 pb-12 md:h-screen min-h-screen">
+        <main className="relative z-10 flex flex-col items-center md:justify-center justify-start px-4 md:pt-16 pt-24 md:pb-32 pb-40 md:h-screen h-auto">
           <div className="w-full max-w-4xl mx-auto text-center space-y-12">
           {/* Hero Section */}
           <div className="space-y-6">
