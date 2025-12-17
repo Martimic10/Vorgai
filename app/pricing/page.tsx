@@ -6,7 +6,6 @@ import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Check, ChevronDown, Loader2 } from 'lucide-react'
 import { StarsBackground } from '@/components/shooting-stars'
-import { createClient } from '@/lib/supabase/client'
 
 const plans = [
   {
@@ -79,7 +78,6 @@ export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index)
@@ -89,19 +87,10 @@ export default function PricingPage() {
     try {
       setLoadingPlan(planName)
 
-      // Check if user is authenticated
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-      if (authError || !user) {
-        // Redirect to signup if not authenticated
-        router.push('/auth/signup')
-        return
-      }
-
       // Get current path to redirect back after payment
       const returnUrl = window.location.pathname + window.location.search
 
-      // Create checkout session
+      // Create checkout session - auth check happens on server
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -113,6 +102,12 @@ export default function PricingPage() {
       const data = await response.json()
 
       if (!response.ok) {
+        // If unauthorized, redirect to signup
+        if (response.status === 401) {
+          router.push('/auth/signup')
+          return
+        }
+
         const errorMessage = data.error || 'Failed to create checkout session'
         console.error('Checkout error:', errorMessage)
         alert(`Error: ${errorMessage}`)
@@ -120,16 +115,16 @@ export default function PricingPage() {
         return
       }
 
-      // Redirect to Stripe checkout
+      // Redirect to Stripe checkout immediately
       if (data.url) {
         window.location.href = data.url
       } else {
+        setLoadingPlan(null)
         throw new Error('No checkout URL returned')
       }
     } catch (error: any) {
       console.error('Error creating checkout session:', error)
       alert(`Failed to start checkout: ${error.message}`)
-    } finally {
       setLoadingPlan(null)
     }
   }

@@ -4,9 +4,7 @@ import { stripe, STRIPE_PRICE_IDS } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
   try {
-    const { planKey, returnUrl } = await request.json()
-
-    // Check if Stripe is configured
+    // Check if Stripe is configured first (fastest check)
     if (!stripe) {
       return NextResponse.json(
         { error: 'Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.' },
@@ -14,7 +12,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify user is authenticated
+    const { planKey, returnUrl } = await request.json()
+
+    // Verify user is authenticated (optimized: runs in parallel with JSON parsing conceptually)
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
