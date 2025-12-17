@@ -109,9 +109,9 @@ export default function Home() {
   }
 
   return (
-    <>
+    <div className="relative min-h-screen overflow-y-auto">
       {/* Background Effects */}
-      <div className="fixed inset-0 bg-background">
+      <div className="fixed inset-0 bg-background -z-10">
         <StarsBackground />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       </div>
@@ -120,7 +120,7 @@ export default function Home() {
       <Navbar />
 
       {/* Main Content */}
-      <main className="relative z-10 flex min-h-screen flex-col items-center justify-start px-4 pt-24 pb-48 overflow-y-auto">
+      <main className="relative z-10 flex flex-col items-center justify-start px-4 pt-24 pb-12 min-h-[calc(100vh-200px)]">
         <div className="w-full max-w-4xl mx-auto text-center space-y-12">
           {/* Hero Section */}
           <div className="space-y-6">
@@ -280,6 +280,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   )
 }
