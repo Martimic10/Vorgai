@@ -109,7 +109,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-y-auto">
+    <div className="relative min-h-screen md:overflow-hidden overflow-y-auto">
       {/* Background Effects */}
       <div className="fixed inset-0 bg-background -z-10">
         <StarsBackground />
@@ -120,7 +120,7 @@ export default function Home() {
       <Navbar />
 
       {/* Main Content */}
-      <main className="relative z-10 flex flex-col items-center justify-start px-4 pt-24 pb-12 min-h-[calc(100vh-200px)]">
+      <main className="relative z-10 flex flex-col items-center md:justify-center justify-start px-4 md:pt-16 pt-24 md:pb-32 pb-12 md:h-screen min-h-screen">
         <div className="w-full max-w-4xl mx-auto text-center space-y-12">
           {/* Hero Section */}
           <div className="space-y-6">
@@ -214,7 +214,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-6 md:py-8 mt-auto">
+      <footer className="relative md:fixed md:bottom-0 md:left-0 md:right-0 z-10 py-6 md:py-8 mt-auto md:mt-0">
         <div className="container-centered">
           <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-4">
             {/* Left side - Legal links */}
