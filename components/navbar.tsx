@@ -127,9 +127,14 @@ export function Navbar() {
           <div className="md:hidden relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center justify-center w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all"
+              className="flex items-center justify-center w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all overflow-hidden"
             >
-              {isMenuOpen ? (
+              {user && !isMenuOpen ? (
+                // Show user avatar if logged in
+                <div className="w-full h-full flex items-center justify-center bg-blue-600 text-white font-semibold text-sm">
+                  {user.email?.charAt(0).toUpperCase() || 'U'}
+                </div>
+              ) : isMenuOpen ? (
                 <X className="w-6 h-6" />
               ) : (
                 <Plus className="w-6 h-6" />
@@ -140,6 +145,33 @@ export function Navbar() {
             {isMenuOpen && (
               <div className="absolute right-0 top-14 w-56 bg-[hsl(var(--bg-secondary))] border border-[hsl(var(--border-color))] rounded-xl shadow-2xl overflow-hidden">
                 <div className="py-2">
+                  {/* Show user info if logged in */}
+                  {user && (
+                    <>
+                      <div className="px-4 py-3 border-b border-[hsl(var(--border-color))]">
+                        <p className="text-xs text-[hsl(var(--text-secondary))]">Signed in as</p>
+                        <p className="text-sm text-[hsl(var(--text-primary))] font-medium truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors font-semibold"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/projects"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                      >
+                        My Projects
+                      </Link>
+                      <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
+                    </>
+                  )}
+
                   <Link
                     href="/docs"
                     onClick={() => setIsMenuOpen(false)}
@@ -154,21 +186,14 @@ export function Navbar() {
                   >
                     Pricing
                   </Link>
-                  <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
+
                   {isInitialLoad ? (
-                    <div className="px-4 py-3">
+                    <div className="px-4 py-3 border-t border-[hsl(var(--border-color))] mt-2">
                       <div className="w-24 h-4 bg-gray-700 dark:bg-gray-700 rounded animate-pulse" />
                     </div>
-                  ) : user ? (
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors font-semibold"
-                    >
-                      Dashboard
-                    </Link>
-                  ) : (
+                  ) : !user ? (
                     <>
+                      <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
                       <Link
                         href="/auth/login"
                         onClick={() => setIsMenuOpen(false)}
@@ -179,9 +204,20 @@ export function Navbar() {
                       <Link
                         href="/auth/signup"
                         onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                        className="flex items-center px-4 py-3 text-sm text-blue-600 hover:bg-[hsl(var(--bg-tertiary))] transition-colors font-semibold"
                       >
                         Get Started
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
+                      <Link
+                        href="/auth/signout"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center px-4 py-3 text-sm text-red-500 hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                      >
+                        Sign Out
                       </Link>
                     </>
                   )}
