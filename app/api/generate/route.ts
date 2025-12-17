@@ -501,14 +501,18 @@ export async function POST(request: Request) {
 
     const { prompt, conversationHistory = [], currentHTML = null, imageUrl = null, isUpdate = false } = await request.json()
 
+    // Get user's subscription plan
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('plan, status, generations_used')
+      .eq('user_id', user.id)
+      .single()
+
+    const plan = subscription?.plan || 'free'
+    const isPaidPlan = plan !== 'free'
+
     // Check generation limits (only for new generations, not updates)
     if (!isUpdate) {
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('plan, status, generations_used')
-        .eq('user_id', user.id)
-        .single()
-
       // Get plan limits
       const planLimits: Record<string, number> = {
         'free': 3,
@@ -517,7 +521,6 @@ export async function POST(request: Request) {
         'agency': -1, // unlimited
       }
 
-      const plan = subscription?.plan || 'free'
       const limit = planLimits[plan]
       const used = subscription?.generations_used || 0
 
@@ -631,6 +634,25 @@ export async function POST(request: Request) {
 
           // Replace /Vorg.png with base64 logo so it works in blob URLs
           generatedHTML = generatedHTML.replace(/src="\/Vorg\.png"/g, `src="${VORG_LOGO_BASE64}"`)
+
+          // Remove Vorg badge for paid plans
+          if (isPaidPlan) {
+            // Remove the badge wrapper div and everything inside it
+            generatedHTML = generatedHTML.replace(
+              /<div id="vorg-badge-wrapper"[\s\S]*?<\/div>\s*<style>[\s\S]*?<\/style>\s*<script>[\s\S]*?<\/script>/gi,
+              ''
+            )
+            // Also remove any standalone badge references
+            generatedHTML = generatedHTML.replace(
+              /<!--\s*VORG BADGE[\s\S]*?-->/gi,
+              ''
+            )
+            // Remove the Made with Vorg Badge comment
+            generatedHTML = generatedHTML.replace(
+              /<!--\s*Made with Vorg Badge\s*-->[\s\S]*?(?=<script>|<\/body>)/gi,
+              ''
+            )
+          }
 
           sendUpdate('status', '✓ Your page is ready!')
           await new Promise(resolve => setTimeout(resolve, 300))
