@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { getUserProjects, getRecentlyViewedProjects, deleteProject, type Project } from '@/lib/projects'
 import { StarsBackground } from '@/components/shooting-stars'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
+import { BillingModal } from '@/components/billing-modal'
 import { ArrowRight, Plus, Trash2, X, Sun, Moon, User, CreditCard, Zap, LogOut } from 'lucide-react'
 import { useTheme } from '@/contexts/theme-context'
 
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false)
+  const [isBillingModalOpen, setIsBillingModalOpen] = useState(false)
   const [userPlan, setUserPlan] = useState<string>('free')
   const [generationsUsed, setGenerationsUsed] = useState<number>(0)
   const [generationLimit, setGenerationLimit] = useState<number>(3)
@@ -370,12 +372,12 @@ export default function DashboardPage() {
                     {generationsUsed} / {generationLimit === 999999 ? '∞' : generationLimit} projects this month
                   </span>
                   {generationLimit < 999999 && (
-                    <Link
-                      href="/pricing"
+                    <button
+                      onClick={() => setIsBillingModalOpen(true)}
                       className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                     >
                       Upgrade
-                    </Link>
+                    </button>
                   )}
                 </div>
               </div>
@@ -573,6 +575,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* Billing Modal */}
+      <BillingModal
+        isOpen={isBillingModalOpen}
+        onClose={() => setIsBillingModalOpen(false)}
+        user={user}
+      />
     </div>
   )
 }
