@@ -112,6 +112,7 @@ export default function PricingPage() {
 
   const handleDowngradeToFree = async () => {
     try {
+      console.log('🔄 Starting downgrade flow...')
       setLoadingPlan('Free')
 
       // Call API to create portal session (works for both test and production)
@@ -120,18 +121,21 @@ export default function PricingPage() {
         headers: { 'Content-Type': 'application/json' },
       })
 
+      console.log('📡 Response status:', response.status)
       const data = await response.json()
+      console.log('📦 Response data:', data)
 
       if (response.ok && data.url) {
+        console.log('✅ Redirecting to:', data.url)
         // Redirect to Stripe portal (same window for better UX)
         window.location.href = data.url
       } else {
-        console.error('Portal error:', data.error)
+        console.error('❌ Portal error:', data.error)
         alert(`Error: ${data.error || 'Could not open Stripe portal. Please try again.'}`)
         setLoadingPlan(null)
       }
     } catch (error) {
-      console.error('Portal error:', error)
+      console.error('❌ Exception:', error)
       alert('Failed to open Stripe portal. Please try again.')
       setLoadingPlan(null)
     }

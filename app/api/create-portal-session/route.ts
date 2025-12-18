@@ -38,11 +38,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Stripe billing portal session
+    console.log('Creating portal session for customer:', subscription.stripe_customer_id)
+
     const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
       return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
     })
 
+    console.log('✅ Portal session created:', session.url)
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error('Error creating portal session:', error)
