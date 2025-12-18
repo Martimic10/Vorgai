@@ -127,7 +127,14 @@ export default function PricingPage() {
         return
       }
 
-      // Redirect to Stripe checkout immediately
+      // Handle subscription update (for existing subscribers changing plans)
+      if (data.updated) {
+        // Plan was updated successfully, redirect to success page
+        window.location.href = data.url
+        return
+      }
+
+      // Redirect to Stripe checkout for new subscriptions
       if (data.url) {
         window.location.href = data.url
       } else {
