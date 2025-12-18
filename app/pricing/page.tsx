@@ -110,7 +110,7 @@ export default function PricingPage() {
     setOpenFaq(openFaq === index ? null : index)
   }
 
-  const handleDowngradeToFree = () => {
+  const handleDowngradeToFree = async () => {
     // Show confirmation dialog
     const confirmed = confirm(
       'To downgrade to the Free plan, you need to cancel your subscription in the Stripe Customer Portal.\n\n' +
@@ -119,9 +119,25 @@ export default function PricingPage() {
     )
 
     if (confirmed) {
-      // Open Stripe Customer Portal
-      window.open('https://billing.stripe.com/p/login/test_00g8zzcxd9Tw4qA5kk', '_blank')
-      alert('After canceling in Stripe, refresh this page to see your updated plan.')
+      try {
+        // Call API to create portal session (works for both test and production)
+        const response = await fetch('/api/create-portal-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        const data = await response.json()
+
+        if (response.ok && data.url) {
+          window.open(data.url, '_blank')
+          alert('After canceling in Stripe, refresh this page to see your updated plan.')
+        } else {
+          alert('Error: Could not open Stripe portal. Please try again.')
+        }
+      } catch (error) {
+        console.error('Portal error:', error)
+        alert('Failed to open Stripe portal. Please try again.')
+      }
     }
   }
 
