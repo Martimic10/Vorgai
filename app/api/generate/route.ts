@@ -605,12 +605,33 @@ export async function POST(request: Request) {
           // Use Claude if available, otherwise fall back to OpenAI
           if (AI_PROVIDER === 'claude') {
             // Build messages for Claude with optional image
-            const claudeContent: any[] = imageUrl
-              ? [
-                  { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageUrl.split(',')[1] } },
-                  { type: 'text', text: userPrompt }
-                ]
-              : [{ type: 'text', text: userPrompt }]
+            let claudeContent: any[]
+
+            if (imageUrl) {
+              // Extract media type from data URL (e.g., "data:image/png;base64,...")
+              const mediaTypeMatch = imageUrl.match(/data:(image\/[^;]+);base64,/)
+              const mediaType = mediaTypeMatch ? mediaTypeMatch[1] : 'image/jpeg'
+              const base64Data = imageUrl.split(',')[1]
+
+              // Enhanced prompt for image-based design
+              const imagePrompt = isUpdate
+                ? `${userPrompt}\n\nThe user has provided a reference image. Use this image as inspiration for the design, layout, colors, and overall aesthetic. Analyze the image carefully and incorporate its design elements into your update.`
+                : `${userPrompt}\n\nThe user has provided a reference image. Use this image as the primary design reference - match its layout, color scheme, typography style, and overall visual aesthetic as closely as possible. This is a design reference to clone or take heavy inspiration from.`
+
+              claudeContent = [
+                {
+                  type: 'image',
+                  source: {
+                    type: 'base64',
+                    media_type: mediaType,
+                    data: base64Data
+                  }
+                },
+                { type: 'text', text: imagePrompt }
+              ]
+            } else {
+              claudeContent = [{ type: 'text', text: userPrompt }]
+            }
 
             const claudeMessages: Anthropic.MessageParam[] = [
               ...conversationHistory,
@@ -629,12 +650,21 @@ export async function POST(request: Request) {
             generatedHTML = response.content[0].type === 'text' ? response.content[0].text : null
           } else {
             // Build messages for OpenAI with optional image
-            const userContent: any = imageUrl
-              ? [
-                  { type: 'text', text: userPrompt },
-                  { type: 'image_url', image_url: { url: imageUrl } }
-                ]
-              : userPrompt
+            let userContent: any
+
+            if (imageUrl) {
+              // Enhanced prompt for image-based design
+              const imagePrompt = isUpdate
+                ? `${userPrompt}\n\nThe user has provided a reference image. Use this image as inspiration for the design, layout, colors, and overall aesthetic. Analyze the image carefully and incorporate its design elements into your update.`
+                : `${userPrompt}\n\nThe user has provided a reference image. Use this image as the primary design reference - match its layout, color scheme, typography style, and overall visual aesthetic as closely as possible. This is a design reference to clone or take heavy inspiration from.`
+
+              userContent = [
+                { type: 'text', text: imagePrompt },
+                { type: 'image_url', image_url: { url: imageUrl } }
+              ]
+            } else {
+              userContent = userPrompt
+            }
 
             const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
               { role: 'system', content: DESIGN_SYSTEM_PROMPT },
