@@ -156,13 +156,6 @@ export function Navbar() {
                       >
                         Dashboard
                       </Link>
-                      <Link
-                        href="/projects"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
-                      >
-                        My Projects
-                      </Link>
                       <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
                     </>
                   )}

@@ -8,7 +8,8 @@ import { createClient } from '@/lib/supabase/client'
 import { getUserProjects, getRecentlyViewedProjects, deleteProject, type Project } from '@/lib/projects'
 import { StarsBackground } from '@/components/shooting-stars'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
-import { ArrowRight, Plus, Trash2, X } from 'lucide-react'
+import { ArrowRight, Plus, Trash2, X, Sun, Moon, User, CreditCard, Zap, LogOut } from 'lucide-react'
+import { useTheme } from '@/contexts/theme-context'
 
 export default function DashboardPage() {
   const [prompt, setPrompt] = useState('')
@@ -20,10 +21,12 @@ export default function DashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false)
+  const [userPlan, setUserPlan] = useState<string>('free')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const avatarMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     const checkUser = async () => {
@@ -35,6 +38,17 @@ export default function DashboardPage() {
       }
 
       setUser(user)
+
+      // Fetch user's subscription plan
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('plan')
+        .eq('user_id', user.id)
+        .single()
+
+      if (subscription?.plan) {
+        setUserPlan(subscription.plan)
+      }
 
       // Fetch user's projects
       const [allProjects, recent] = await Promise.all([
@@ -240,47 +254,52 @@ export default function DashboardPage() {
 
             {/* Dropdown Menu */}
             {isAvatarMenuOpen && (
-              <div className="absolute right-0 top-12 w-56 bg-[hsl(var(--bg-secondary))] border border-[hsl(var(--border-color))] rounded-xl shadow-2xl overflow-hidden">
+              <div className="absolute right-0 top-12 w-64 bg-[hsl(var(--bg-secondary))] border border-[hsl(var(--border-color))] rounded-xl shadow-2xl overflow-hidden">
                 <div className="py-2">
-                  {/* User Info */}
+                  {/* User Info with Plan Badge */}
                   <div className="px-4 py-3 border-b border-[hsl(var(--border-color))]">
-                    <p className="text-xs text-[hsl(var(--text-secondary))]">Signed in as</p>
-                    <p className="text-sm text-[hsl(var(--text-primary))] font-medium truncate">
+                    <p className="text-sm text-[hsl(var(--text-primary))] font-medium truncate mb-1">
                       {user?.email}
+                    </p>
+                    <p className="text-xs text-[hsl(var(--text-secondary))] capitalize">
+                      {userPlan === 'free' ? 'Free Plan' : `${userPlan.charAt(0).toUpperCase() + userPlan.slice(1)} Plan`}
                     </p>
                   </div>
 
                   {/* Menu Items */}
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setIsAvatarMenuOpen(false)}
-                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors font-semibold"
+                  <button
+                    onClick={() => {
+                      toggleTheme()
+                      setIsAvatarMenuOpen(false)
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
                   >
-                    Dashboard
-                  </Link>
+                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    Light Mode
+                  </button>
                   <Link
-                    href="/projects"
+                    href="/account"
                     onClick={() => setIsAvatarMenuOpen(false)}
-                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
                   >
-                    My Projects
+                    <User className="w-4 h-4" />
+                    Account Settings
                   </Link>
-
-                  <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
-
                   <Link
                     href="/pricing"
                     onClick={() => setIsAvatarMenuOpen(false)}
-                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
                   >
-                    Pricing
+                    <CreditCard className="w-4 h-4" />
+                    Billing
                   </Link>
                   <Link
-                    href="/docs"
+                    href="/pricing"
                     onClick={() => setIsAvatarMenuOpen(false)}
-                    className="flex items-center px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
                   >
-                    Docs
+                    <Zap className="w-4 h-4" />
+                    Upgrade Plan
                   </Link>
 
                   <div className="border-t border-[hsl(var(--border-color))] my-2"></div>
@@ -288,8 +307,9 @@ export default function DashboardPage() {
                   <Link
                     href="/auth/signout"
                     onClick={() => setIsAvatarMenuOpen(false)}
-                    className="flex items-center px-4 py-3 text-sm text-red-500 hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--bg-tertiary))] transition-colors"
                   >
+                    <LogOut className="w-4 h-4" />
                     Sign Out
                   </Link>
                 </div>
