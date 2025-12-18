@@ -17,8 +17,7 @@ const plans = [
     features: [
       '3 projects/month',
       'Save & reopen projects',
-      'Single file HTML export',
-      'Community support',
+      'Priority support',
     ],
     cta: 'Current Plan',
     popular: false,
