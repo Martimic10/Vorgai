@@ -10,15 +10,30 @@ import { getUserSubscription } from '@/lib/subscription'
 
 const plans = [
   {
+    name: 'Free',
+    planKey: 'free',
+    price: '$0',
+    period: '/mo',
+    features: [
+      '3 projects/month',
+      'Save & reopen projects',
+      'Single file HTML export',
+      'Community support',
+    ],
+    cta: 'Current Plan',
+    popular: false,
+    isFree: true,
+  },
+  {
     name: 'Starter',
     planKey: 'starter',
     price: '$9',
     period: '/mo',
     features: [
       '10 projects/month',
-      'Save & reopen projects',
-      'Single file HTML export',
+      'Everything in Free',
       'Remove Vorg badge',
+      'Priority support',
     ],
     cta: 'Get Starter Plan',
     popular: false,
@@ -181,7 +196,7 @@ export default function PricingPage() {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-20 sm:mb-32">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-20 sm:mb-32">
             {plans.map((plan) => (
               <div
                 key={plan.name}
@@ -228,8 +243,8 @@ export default function PricingPage() {
                 </ul>
 
                 <Button
-                  onClick={() => handleSubscribe(plan.planKey, plan.name)}
-                  disabled={loadingPlan === plan.name || currentPlan === plan.planKey}
+                  onClick={() => plan.isFree ? null : handleSubscribe(plan.planKey, plan.name)}
+                  disabled={loadingPlan === plan.name || currentPlan === plan.planKey || plan.isFree}
                   className={`w-full h-11 rounded-lg font-medium transition-all ${
                     plan.popular
                       ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:opacity-50 disabled:cursor-not-allowed'
@@ -243,6 +258,8 @@ export default function PricingPage() {
                     </span>
                   ) : currentPlan === plan.planKey ? (
                     'Current Plan'
+                  ) : plan.isFree ? (
+                    'Always Free'
                   ) : (
                     plan.cta
                   )}

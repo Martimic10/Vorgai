@@ -501,10 +501,10 @@ export async function POST(request: Request) {
 
     const { prompt, conversationHistory = [], currentHTML = null, imageUrl = null, isUpdate = false } = await request.json()
 
-    // Get user's subscription plan
+    // Get user's subscription plan and check for monthly reset
     const { data: subscription } = await supabase
       .from('subscriptions')
-      .select('plan, status, generations_used')
+      .select('plan, status, generations_used, generation_limit, generation_reset_at')
       .eq('user_id', user.id)
       .single()
 
@@ -513,26 +513,51 @@ export async function POST(request: Request) {
 
     // Check generation limits (only for new generations, not updates)
     if (!isUpdate) {
-      // Get plan limits
+      // Check if monthly reset is needed
+      const resetAt = subscription?.generation_reset_at ? new Date(subscription.generation_reset_at) : null
+      const now = new Date()
+
+      let currentUsed = subscription?.generations_used || 0
+      let currentLimit = subscription?.generation_limit || 3
+
+      // Reset monthly counter if period has passed
+      if (resetAt && now >= resetAt) {
+        const newResetDate = new Date(now)
+        newResetDate.setDate(newResetDate.getDate() + 30)
+
+        await supabase
+          .from('subscriptions')
+          .update({
+            generations_used: 0,
+            generation_reset_at: newResetDate.toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id)
+
+        currentUsed = 0
+      }
+
+      // Get plan limits (for reference, actual limit is in database)
       const planLimits: Record<string, number> = {
         'free': 3,
         'starter': 10,
         'pro': 20,
-        'agency': -1, // unlimited
+        'agency': 999999, // effectively unlimited
       }
 
-      const limit = planLimits[plan]
-      const used = subscription?.generations_used || 0
+      // Use database limit, fallback to plan defaults
+      const limit = currentLimit || planLimits[plan] || 3
 
-      // Check if user has reached limit
-      if (limit !== -1 && used >= limit) {
+      // Check if user has reached limit (unlimited = 999999)
+      if (limit < 999999 && currentUsed >= limit) {
         return new Response(
           JSON.stringify({
             error: 'LIMIT_REACHED',
-            message: `You've reached your ${plan} plan limit of ${limit} projects. Upgrade to continue generating.`,
+            message: `You've reached your ${plan} plan limit of ${limit} projects this month. ${plan === 'free' ? 'Upgrade to get more projects' : 'Your limit resets in ' + Math.ceil((resetAt ? (resetAt.getTime() - now.getTime()) : 0) / (1000 * 60 * 60 * 24)) + ' days'}.`,
             plan,
-            used,
-            limit
+            used: currentUsed,
+            limit,
+            resetAt: resetAt?.toISOString()
           }),
           { status: 402, headers: { 'Content-Type': 'application/json' } }
         )

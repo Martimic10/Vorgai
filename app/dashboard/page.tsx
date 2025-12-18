@@ -22,6 +22,8 @@ export default function DashboardPage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false)
   const [userPlan, setUserPlan] = useState<string>('free')
+  const [generationsUsed, setGenerationsUsed] = useState<number>(0)
+  const [generationLimit, setGenerationLimit] = useState<number>(3)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const avatarMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -39,15 +41,17 @@ export default function DashboardPage() {
 
       setUser(user)
 
-      // Fetch user's subscription plan
+      // Fetch user's subscription plan and usage
       const { data: subscription } = await supabase
         .from('subscriptions')
-        .select('plan')
+        .select('plan, generations_used, generation_limit')
         .eq('user_id', user.id)
         .single()
 
       if (subscription?.plan) {
         setUserPlan(subscription.plan)
+        setGenerationsUsed(subscription.generations_used || 0)
+        setGenerationLimit(subscription.generation_limit || 3)
       }
 
       // Fetch user's projects
@@ -357,9 +361,23 @@ export default function DashboardPage() {
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-[hsl(var(--text-primary))]">
                   Create Your Landing Page
                 </h1>
-                <p className="text-base sm:text-lg text-[hsl(var(--text-secondary))]">
+                <p className="text-base sm:text-lg text-[hsl(var(--text-secondary))] mb-4">
                   Describe your vision and let AI build it for you
                 </p>
+                {/* Generation Counter */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-[hsl(var(--bg-secondary))] border border-[hsl(var(--border-color))] rounded-full">
+                  <span className="text-sm text-[hsl(var(--text-secondary))]">
+                    {generationsUsed} / {generationLimit === 999999 ? '∞' : generationLimit} projects this month
+                  </span>
+                  {generationLimit < 999999 && (
+                    <Link
+                      href="/pricing"
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Upgrade
+                    </Link>
+                  )}
+                </div>
               </div>
 
               {/* Input Box */}

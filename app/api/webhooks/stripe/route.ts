@@ -70,17 +70,22 @@ export async function POST(request: NextRequest) {
         // Get the price ID to determine the plan
         const priceId = subscription.items.data[0].price.id
         let plan = 'free'
+        let generationLimit = 3
 
         if (priceId === process.env.STRIPE_STARTER_PRICE_ID) {
           plan = 'starter'
+          generationLimit = 10
         } else if (priceId === process.env.STRIPE_PRO_PRICE_ID) {
           plan = 'pro'
+          generationLimit = 20
         } else if (priceId === process.env.STRIPE_AGENCY_PRICE_ID) {
           plan = 'agency'
+          generationLimit = 999999
         }
 
         console.log('💳 Updating subscription to plan:', plan)
         console.log('   Price ID:', priceId)
+        console.log('   Generation Limit:', generationLimit)
         console.log('   Stripe Customer ID:', session.customer)
         console.log('   Stripe Subscription ID:', subscription.id)
 
@@ -95,7 +100,9 @@ export async function POST(request: NextRequest) {
             status: subscription.status === 'active' ? 'active' : subscription.status === 'past_due' ? 'past_due' : 'canceled',
             current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            generation_limit: generationLimit,
             generations_used: 0, // Reset generation count on new subscription
+            generation_reset_at: new Date(subscription.current_period_end * 1000).toISOString(), // Reset aligns with billing period
             updated_at: new Date().toISOString(),
           }, {
             onConflict: 'user_id'
@@ -119,16 +126,24 @@ export async function POST(request: NextRequest) {
         // Get the price ID to determine the plan
         const priceId = subscription.items.data[0].price.id
         let plan = 'free'
+        let generationLimit = 3
 
         if (priceId === process.env.STRIPE_STARTER_PRICE_ID) {
           plan = 'starter'
+          generationLimit = 10
         } else if (priceId === process.env.STRIPE_PRO_PRICE_ID) {
           plan = 'pro'
+          generationLimit = 20
         } else if (priceId === process.env.STRIPE_AGENCY_PRICE_ID) {
           plan = 'agency'
+          generationLimit = 999999
         }
 
-        // Update subscription status
+        console.log('🔄 Subscription updated')
+        console.log('   Plan:', plan)
+        console.log('   Generation Limit:', generationLimit)
+
+        // Update subscription status and limits
         const { error } = await supabaseAdmin
           .from('subscriptions')
           .update({
@@ -136,35 +151,46 @@ export async function POST(request: NextRequest) {
             status: subscription.status === 'active' ? 'active' : subscription.status === 'past_due' ? 'past_due' : 'canceled',
             current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            generation_limit: generationLimit,
+            generation_reset_at: new Date(subscription.current_period_end * 1000).toISOString(),
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', subscription.id)
 
         if (error) {
-          console.error('Error updating subscription:', error)
+          console.error('❌ Error updating subscription:', error)
           throw error
         }
 
+        console.log('✅ Subscription updated successfully')
         break
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription
 
-        // Mark subscription as canceled (keep the record but update status)
+        console.log('🗑️  Subscription deleted/canceled')
+        console.log('   Subscription ID:', subscription.id)
+
+        // Downgrade user to free plan when subscription is canceled
         const { error } = await supabaseAdmin
           .from('subscriptions')
           .update({
-            status: 'canceled',
+            plan: 'free',
+            status: null,
+            stripe_subscription_id: null,
+            generation_limit: 3,
+            // Keep generations_used and generation_reset_at to maintain monthly cycle
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', subscription.id)
 
         if (error) {
-          console.error('Error canceling subscription:', error)
+          console.error('❌ Error downgrading to free plan:', error)
           throw error
         }
 
+        console.log('✅ User downgraded to free plan')
         break
       }
     }
