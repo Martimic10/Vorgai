@@ -175,9 +175,9 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-5xl max-h-[90vh] bg-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-7xl max-h-[95vh] bg-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-5 border-b border-white/10">
           <div>
             <h2 className="text-lg sm:text-xl font-semibold text-white">Billing & Plans</h2>
             <p className="text-sm text-gray-400 mt-0.5">
@@ -198,7 +198,7 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)] scrollbar-hide">
+        <div className="overflow-y-auto max-h-[calc(95vh-100px)] scrollbar-hide">
           <style jsx>{`
             .scrollbar-hide {
               -ms-overflow-style: none;
@@ -209,7 +209,7 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
             }
           `}</style>
 
-          <div className="px-4 sm:px-6 py-6 sm:py-8">
+          <div className="px-6 sm:px-8 py-8 sm:py-10">
             {/* Subtitle */}
             <div className="text-center mb-6 sm:mb-8">
               <p className="text-gray-300 text-sm sm:text-base">
@@ -218,35 +218,41 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
             </div>
 
             {/* Pricing Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-8 sm:mb-10">
               {plans.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`relative rounded-xl border p-6 transition-all duration-300 ${
+                  className={`relative rounded-xl border p-6 sm:p-7 transition-all duration-300 ${
                     plan.popular
                       ? 'border-white/30 bg-white/5 shadow-[0_0_30px_rgba(255,255,255,0.1)]'
                       : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
                   }`}
                 >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold tracking-wide">
+                  {currentPlan === plan.planKey ? (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                      <span className="bg-green-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide shadow-lg whitespace-nowrap">
+                        CURRENT PLAN
+                      </span>
+                    </div>
+                  ) : plan.popular ? (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                      <span className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide shadow-lg whitespace-nowrap">
                         MOST POPULAR
                       </span>
                     </div>
-                  )}
+                  ) : null}
 
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3 text-gray-300">
+                  <div className="mb-6 mt-2">
+                    <h3 className="text-xl font-semibold mb-3 text-gray-300">
                       {plan.name}
                     </h3>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-white">{plan.price}</span>
-                      <span className="text-gray-400 text-base">{plan.period}</span>
+                      <span className="text-5xl font-bold text-white">{plan.price}</span>
+                      <span className="text-gray-400 text-lg">{plan.period}</span>
                     </div>
                   </div>
 
-                  <ul className="space-y-3 mb-6">
+                  <ul className="space-y-3.5 mb-7">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2.5">
                         <Check className="w-4 h-4 flex-shrink-0 mt-0.5 text-white" />
@@ -268,7 +274,7 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
                       }
                     }}
                     disabled={loadingPlan === plan.name || currentPlan === plan.planKey}
-                    className={`w-full h-10 rounded-lg font-medium transition-all text-sm ${
+                    className={`w-full h-11 rounded-lg font-medium transition-all text-sm ${
                       plan.popular
                         ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
                         : 'bg-white/10 text-white hover:bg-white/15 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed'
