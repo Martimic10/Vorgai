@@ -457,13 +457,31 @@ OUTPUT FORMAT
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll for anchor links (navbar links)
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+      });
+    });
+
+    // Prevent all external links from opening (keep users in preview)
+    document.querySelectorAll('a:not([href^="#"])').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    // Prevent form submissions
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
       });
     });
   });

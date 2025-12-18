@@ -1394,12 +1394,34 @@ function GeneratePageContent() {
 
                       {/* Lovable-style formatted content */}
                       <div className="text-[hsl(var(--text-primary))]/90 text-sm leading-relaxed space-y-3">
-                        {/* Title */}
-                        <p className="font-medium text-[hsl(var(--text-primary))]">
-                          Your landing page is live! It features:
-                        </p>
+                        {/* Show conversational response first if available */}
+                        {message.content && !message.content.includes('✓') && (
+                          <p className="text-[hsl(var(--text-primary))]/90">
+                            {message.content}
+                          </p>
+                        )}
 
-                        {/* Feature bullets with bold labels */}
+                        {/* Status messages (with checkmarks) */}
+                        {message.content && message.content.includes('✓') && !generatedHTML && (
+                          <div className="text-[hsl(var(--text-primary))]/70 text-xs space-y-1">
+                            {message.content.split('\n').map((line, i) => (
+                              line.trim() && <div key={i}>{line}</div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Title - Dynamic based on generation state */}
+                        {!generatedHTML && isGenerating && message.content && message.content.includes('✓') ? (
+                          <p className="font-medium text-[hsl(var(--text-primary))]">
+                            Your landing page is being built...
+                          </p>
+                        ) : generatedHTML ? (
+                          <p className="font-medium text-[hsl(var(--text-primary))]">
+                            Your landing page is live! It features:
+                          </p>
+                        ) : null}
+
+                        {/* Feature bullets with bold labels - Only show when HTML is generated */}
                         {generatedHTML && (
                           <div className="space-y-2 pl-1">
                             {(generatedHTML.includes('nav') || generatedHTML.includes('header')) && (
