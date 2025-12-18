@@ -110,6 +110,21 @@ export default function PricingPage() {
     setOpenFaq(openFaq === index ? null : index)
   }
 
+  const handleDowngradeToFree = () => {
+    // Show confirmation dialog
+    const confirmed = confirm(
+      'To downgrade to the Free plan, you need to cancel your subscription in the Stripe Customer Portal.\n\n' +
+      'After canceling, you\'ll keep access until the end of your billing period, then automatically downgrade to Free (3 projects/month).\n\n' +
+      'Open Stripe Customer Portal?'
+    )
+
+    if (confirmed) {
+      // Open Stripe Customer Portal
+      window.open('https://billing.stripe.com/p/login/test_00g8zzcxd9Tw4qA5kk', '_blank')
+      alert('After canceling in Stripe, refresh this page to see your updated plan.')
+    }
+  }
+
   const handleSubscribe = async (planKey: string, planName: string) => {
     try {
       setLoadingPlan(planName)
@@ -206,20 +221,19 @@ export default function PricingPage() {
                     : 'border-[hsl(var(--border-color))] bg-[hsl(var(--bg-secondary))] hover:border-[hsl(var(--border-hover))] hover:bg-[hsl(var(--bg-tertiary))] shadow-md'
                 }`}
               >
-                {plan.popular && !currentPlan && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-semibold tracking-wide shadow-lg">
-                      MOST POPULAR
-                    </span>
-                  </div>
-                )}
-                {currentPlan === plan.planKey && (
+                {currentPlan === plan.planKey ? (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="bg-green-600 text-white px-4 py-1 rounded-full text-xs font-semibold tracking-wide shadow-lg">
                       CURRENT PLAN
                     </span>
                   </div>
-                )}
+                ) : plan.popular ? (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-semibold tracking-wide shadow-lg">
+                      MOST POPULAR
+                    </span>
+                  </div>
+                ) : null}
 
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold mb-4 text-[hsl(var(--text-secondary))]">
@@ -243,8 +257,16 @@ export default function PricingPage() {
                 </ul>
 
                 <Button
-                  onClick={() => plan.isFree ? null : handleSubscribe(plan.planKey, plan.name)}
-                  disabled={loadingPlan === plan.name || currentPlan === plan.planKey || plan.isFree}
+                  onClick={() => {
+                    if (plan.isFree && currentPlan !== 'free') {
+                      // Paid user clicking Free plan - open downgrade dialog
+                      handleDowngradeToFree()
+                    } else if (!plan.isFree) {
+                      // Clicking any paid plan
+                      handleSubscribe(plan.planKey, plan.name)
+                    }
+                  }}
+                  disabled={loadingPlan === plan.name || currentPlan === plan.planKey}
                   className={`w-full h-11 rounded-lg font-medium transition-all ${
                     plan.popular
                       ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:opacity-50 disabled:cursor-not-allowed'
@@ -258,6 +280,8 @@ export default function PricingPage() {
                     </span>
                   ) : currentPlan === plan.planKey ? (
                     'Current Plan'
+                  ) : plan.isFree && currentPlan !== 'free' ? (
+                    'Downgrade to Free'
                   ) : plan.isFree ? (
                     'Always Free'
                   ) : (

@@ -91,6 +91,21 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
     setSubscription(data)
   }
 
+  const handleDowngradeToFree = () => {
+    // Show confirmation dialog
+    const confirmed = confirm(
+      'To downgrade to the Free plan, you need to cancel your subscription in the Stripe Customer Portal.\n\n' +
+      'After canceling, you\'ll keep access until the end of your billing period, then automatically downgrade to Free (3 projects/month).\n\n' +
+      'Open Stripe Customer Portal?'
+    )
+
+    if (confirmed) {
+      // Open Stripe Customer Portal
+      window.open('https://billing.stripe.com/p/login/test_00g8zzcxd9Tw4qA5kk', '_blank')
+      alert('After canceling in Stripe, refresh this page to see your updated plan.')
+    }
+  }
+
   const handleSubscribe = async (planKey: string, planName: string) => {
     try {
       setLoadingPlan(planName)
@@ -227,8 +242,16 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
                   </ul>
 
                   <Button
-                    onClick={() => plan.isFree ? null : handleSubscribe(plan.planKey, plan.name)}
-                    disabled={loadingPlan === plan.name || currentPlan === plan.planKey || plan.isFree}
+                    onClick={() => {
+                      if (plan.isFree && currentPlan !== 'free') {
+                        // Paid user clicking Free plan - open downgrade dialog
+                        handleDowngradeToFree()
+                      } else if (!plan.isFree) {
+                        // Clicking any paid plan
+                        handleSubscribe(plan.planKey, plan.name)
+                      }
+                    }}
+                    disabled={loadingPlan === plan.name || currentPlan === plan.planKey}
                     className={`w-full h-10 rounded-lg font-medium transition-all text-sm ${
                       plan.popular
                         ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
@@ -242,6 +265,8 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
                       </span>
                     ) : currentPlan === plan.planKey ? (
                       'Current Plan'
+                    ) : plan.isFree && currentPlan !== 'free' ? (
+                      'Downgrade to Free'
                     ) : plan.isFree ? (
                       'Always Free'
                     ) : (
