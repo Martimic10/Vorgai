@@ -14,15 +14,30 @@ interface BillingModalProps {
 
 const plans = [
   {
+    name: 'Free',
+    planKey: 'free',
+    price: '$0',
+    period: '/mo',
+    features: [
+      '3 projects/month',
+      'Save & reopen projects',
+      'Single file HTML export',
+      'Community support',
+    ],
+    cta: 'Current Plan',
+    popular: false,
+    isFree: true,
+  },
+  {
     name: 'Starter',
     planKey: 'starter',
     price: '$9',
     period: '/mo',
     features: [
       '10 projects/month',
-      'Save & reopen projects',
-      'Single file HTML export',
+      'Everything in Free',
       'Remove Vorg badge',
+      'Priority support',
     ],
     cta: 'Get Starter Plan',
     popular: false,
@@ -97,6 +112,14 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
         return
       }
 
+      // Handle subscription update (for existing subscribers changing plans)
+      if (data.updated) {
+        // Plan was updated successfully, redirect to success page
+        window.location.href = data.url
+        return
+      }
+
+      // Redirect to Stripe checkout for new subscriptions
       if (data.url) {
         window.location.href = data.url
       }
@@ -164,7 +187,7 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
             </div>
 
             {/* Pricing Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-6 sm:mb-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
               {plans.map((plan) => (
                 <div
                   key={plan.name}
@@ -204,8 +227,8 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
                   </ul>
 
                   <Button
-                    onClick={() => handleSubscribe(plan.planKey, plan.name)}
-                    disabled={loadingPlan === plan.name || currentPlan === plan.planKey}
+                    onClick={() => plan.isFree ? null : handleSubscribe(plan.planKey, plan.name)}
+                    disabled={loadingPlan === plan.name || currentPlan === plan.planKey || plan.isFree}
                     className={`w-full h-10 rounded-lg font-medium transition-all text-sm ${
                       plan.popular
                         ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
@@ -219,6 +242,8 @@ export function BillingModal({ isOpen, onClose, user }: BillingModalProps) {
                       </span>
                     ) : currentPlan === plan.planKey ? (
                       'Current Plan'
+                    ) : plan.isFree ? (
+                      'Always Free'
                     ) : (
                       plan.cta
                     )}
