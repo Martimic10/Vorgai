@@ -284,6 +284,22 @@ function GeneratePageContent() {
     const trimmed = prompt.trim()
     if (trimmed.length === 0) return 'Untitled Project'
 
+    // First, check for brand names that look like custom names (capitalized words, no spaces, or specific patterns)
+    // Examples: "Vortext", "GolfnGo", "TechStart", "MyApp"
+    const customNameMatch = trimmed.match(/\b([A-Z][a-z]*(?:[A-Z][a-z]*)+)\b/)
+    if (customNameMatch) {
+      return customNameMatch[1]
+    }
+
+    // Check for quoted names: "MyBrand", 'MyBrand', etc.
+    const quotedMatch = trimmed.match(/["']([^"']+)["']/)
+    if (quotedMatch) {
+      return quotedMatch[1]
+        .split(/\s+/)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ')
+    }
+
     // Check if "clone" appears in the prompt BEFORE cleaning
     const isCloneRequest = /\b(clone|like|similar\s+to)\b/i.test(trimmed)
 
@@ -291,6 +307,7 @@ function GeneratePageContent() {
     let cleaned = trimmed
       .replace(/^(build|create|make|generate|design)\s+(me\s+)?((a|an)\s+)?/i, '')
       .replace(/landing\s+page\s+(for|of)?/i, '')
+      .replace(/\b(website|page|site)\b/gi, '')
       .trim()
 
     // Check for famous brands/companies (clone requests)
@@ -321,6 +338,18 @@ function GeneratePageContent() {
 
     // Remove "clone" and similar words from cleaned now for product type detection
     cleaned = cleaned.replace(/\b(clone|like|similar\s+to)\b/gi, '').trim()
+
+    // Check for "called" or "named" patterns: "a SaaS app called Vortext"
+    const namedMatch = cleaned.match(/\b(?:called|named)\s+([A-Z][a-zA-Z0-9]*(?:\s+[A-Z][a-zA-Z0-9]*)?)\b/)
+    if (namedMatch) {
+      return namedMatch[1]
+    }
+
+    // Check for "for" patterns: "for GolfnGo" or "for my startup Vortext"
+    const forMatch = cleaned.match(/\bfor\s+(?:my\s+)?(?:startup|company|business|app|product)?\s*([A-Z][a-zA-Z0-9]+)\b/)
+    if (forMatch) {
+      return forMatch[1]
+    }
 
     // Check for product types
     const productTypes: { [key: string]: string } = {
@@ -489,7 +518,14 @@ function GeneratePageContent() {
           if (line.startsWith('data: ')) {
             const data = JSON.parse(line.slice(6))
 
-            if (data.type === 'status') {
+            if (data.type === 'chat') {
+              // AI's conversational response - replace the AI message content
+              setMessages(prev => prev.map(msg =>
+                msg.id === aiMessageId
+                  ? { ...msg, content: data.content }
+                  : msg
+              ))
+            } else if (data.type === 'status') {
               // Update AI message with status
               setMessages(prev => prev.map(msg =>
                 msg.id === aiMessageId
@@ -973,7 +1009,15 @@ function GeneratePageContent() {
           if (line.startsWith('data: ')) {
             const data = JSON.parse(line.slice(6))
 
-            if (data.type === 'status') {
+            if (data.type === 'chat') {
+              // AI's conversational response - replace the AI message content
+              setMessages(prev => prev.map(msg =>
+                msg.id === aiMessageId
+                  ? { ...msg, content: data.content }
+                  : msg
+              ))
+            } else if (data.type === 'status') {
+              // Status updates - append to AI message
               setMessages(prev => prev.map(msg =>
                 msg.id === aiMessageId
                   ? { ...msg, content: msg.content ? msg.content + '\n' + data.content : data.content }

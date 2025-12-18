@@ -18,6 +18,8 @@ const AI_PROVIDER = process.env.OPENAI_API_KEY ? 'openai' : 'claude'
 // This is a 32x32 optimized version of the logo (1.4KB)
 const VORG_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAFL0lEQVR4nNVXXWwUVRSeuefcO3N3Z3e7u91AoVoTQaBNoGS7O7MttSQaoya8GJbok1GMwQcT0MSYSFyjMTEajeiTD8QH9AElGo2B8ISikBgeSIjxB1EMIKWh/EhbSnd3OubcmWlnF5aWUEk8yZ25c+455/vuvef+jKb9T0W/QbkjwjRNwxaAetDG/itg1qjqFqlUqo2KpmlibvvbA9epwjnvAeDvAPDDiPgnAI4C4HkAqvNDAPCWZVndgZ++ECSAHolEYgUi3wuAEwBwEFFsF0JsiKVSeZlM9gkpN6AQ2wH49wA4jsi/ESKxPIiBtwXOufEMANYZY18KkVgR6V2zKB3ZMMa/Ih/OjaejsW4ZHFFUGMO6EGJjBCRMNojMNUSSM5gucxP5IopXbpUE+ODGc4zhJJqJUqCfb4aHK0UzzfQAAE5yzp+dLwnms+drgOG4EPIxX10W2pCHmubps6VZIm3KtqxWBsUAhv9QAkcxWonu9x73I+KnVM/2flvodE7JG4O1+ta0rqGTZiZ/0PbjiV2M8b1RjJa9l1LaAHjBsrpW0bfZe/ZJ7kwcNgcub0oPnrlr2cPHjUqlwpoJlMufQdfQATNTPN0p113aCM7EIaNv+ClqpVi0ZKWUhZuNAqgH8A8R+b5Q2dHxdYyVqj+zQc9jdm0M7KlT6EwckM7o0tBGFk93cmfyOyhNnWbF2pg+QLbVXxat3h8PbZDzfZyLD6JY1w19QOCIEGKb+lj2vEEv0Te2lYLqznRdL03X9XWeJ/JjL4Q+oji2jXSqjWwGPE/YYy82xBByK+fiyI0wZz5yuZyFyM8aRny90mpDKpvbV/7VAXZ1WO8nEvUqAUBx6gcv8IPCtYN6KWjr9zxwauey/eeXRGNYljWEyIez2WyiJYFMJrMUAC9ms9mVgZ5pZc/fkApX31O9LLo1AmNO3Y0XLvRYvaPdzK65PgG3Rja8OL5Defu+ar7b29vvo9jpdPrumxHovI6A5qkA8bXnVjO7dlUBFdyaGubClZdFfvwlf3rcGvWeFWvXYoWRXt9d+QYEli6fD4EkAB82zUT/LIGZQBoWJ3frg7NgUJg6TkWRsn1S2Df5ReATAihf07IGEPgIYbQkQIIojiLiloZsDabBWHP5IUZgJW9ad1xPt+ntTeu2q3TM8bxY/sKjUZ/IzroFURzTZkVvtf/vRMQ9DQQC44pWYZR8Khcc19Vtl4hQcdWI2FOHy1oZmkYgiMv3AIqPm+I2iN9Lw3gAAEeklEsamIbJmL+yWc15yXX10jQtTVWnkTHyVzZHbUNfKSUl94hhGA9GsVoKXTgA+PuN57nfo1TX0TYoVE/4S9Ktq0K9L1ZPpPN/pKK2oS8A30ExtXkIo4dpmoOM4Tia5mADiXAU1k68ppIx3HhoY3KuvtrU++BENO8HgAnEmVhznqgsYP06MBxNGsl7Az3XgvlNrTh5DxSm/mZ2vcbsWh2K1TNtpbNdvpmy4VRLJpPL6AxAxMp8wUPxlx3iTsbgkpRYjOjVvSDX/ePibP7XlZm1v63KFX5aHG0jQymlA4CXAfhH0ZjzFT1yN3gTAD0A/nY6raXmupKlUl1tnBvvBj5vRMBv+d9Bj6yM9YzBMTqmAcQuzs3HLSuzKpfrXkwlHV/UY3LzCUTxCQC/yBgeo7kP4sDt/LjoIQm6AwghHgEQuxH5ccaIjF8Yg4sI+DtD/FwIQRtRdA9YkL8maAoEsVisIx6P98TT6R6qN63tGeILLTBH4LnaF0z0yJU8LHfsB3VB5V8MOJMhSTtFMwAAAABJRU5ErkJggg=='
 
+const CONVERSATIONAL_PROMPT = `You are Vorg, a friendly AI assistant that helps users create landing pages. When a user uploads an image or describes what they want, analyze it and respond conversationally. Describe what you see in the image, ask clarifying questions if needed, or confirm what you're about to build. Keep responses SHORT (2-3 sentences max). Be friendly and helpful like ChatGPT.`
+
 const DESIGN_SYSTEM_PROMPT = `You are Vorg, an elite AI landing page generator that creates production-ready pages rivaling Google Stitch, Framer, and the best design agencies.
 
 CRITICAL: Every output must be pixel-perfect with ZERO overlapping elements, proper z-index management, and complete realistic content.
@@ -583,9 +585,91 @@ export async function POST(request: Request) {
             )
           }
 
-          sendUpdate('status', '✓ Analyzing prompt...')
-          await new Promise(resolve => setTimeout(resolve, 500))
+          // Step 1: Get conversational response from AI
+          let conversationalResponse = ''
 
+          // Determine if this is an update or initial generation
+          const isUpdate = currentHTML && conversationHistory.length > 0
+
+          // Build conversational prompt
+          let conversationalPrompt = ''
+          if (imageUrl) {
+            conversationalPrompt = isUpdate
+              ? `The user uploaded an image and said: "${prompt}". Briefly describe what you see in the image and confirm you'll update the design. Keep it to 2-3 sentences.`
+              : `The user uploaded an image and said: "${prompt}". Briefly describe what you see in the image and confirm you'll create a design based on it. Keep it to 2-3 sentences.`
+          } else {
+            conversationalPrompt = isUpdate
+              ? `The user wants to update their landing page: "${prompt}". Briefly confirm what you'll change. Keep it to 2-3 sentences.`
+              : `The user wants to create: "${prompt}". Briefly confirm what you'll build. Keep it to 2-3 sentences.`
+          }
+
+          sendUpdate('status', '✓ Analyzing your request...')
+
+          // Get conversational response
+          if (AI_PROVIDER === 'claude') {
+            let conversationalContent: any[] = []
+
+            if (imageUrl) {
+              const mediaTypeMatch = imageUrl.match(/data:(image\/[^;]+);base64,/)
+              const mediaType = mediaTypeMatch ? mediaTypeMatch[1] : 'image/jpeg'
+              const base64Data = imageUrl.split(',')[1]
+
+              conversationalContent = [
+                {
+                  type: 'image',
+                  source: {
+                    type: 'base64',
+                    media_type: mediaType,
+                    data: base64Data
+                  }
+                },
+                { type: 'text', text: conversationalPrompt }
+              ]
+            } else {
+              conversationalContent = [{ type: 'text', text: conversationalPrompt }]
+            }
+
+            const conversationalMessages: Anthropic.MessageParam[] = [
+              { role: 'user', content: conversationalContent }
+            ]
+
+            const conversationalResult = await anthropic.messages.create({
+              model: 'claude-sonnet-4-20250514',
+              max_tokens: 200,
+              system: CONVERSATIONAL_PROMPT,
+              messages: conversationalMessages,
+              temperature: 0.7,
+            })
+
+            conversationalResponse = conversationalResult.content[0].type === 'text' ? conversationalResult.content[0].text : ''
+          } else {
+            let conversationalContent: any = conversationalPrompt
+
+            if (imageUrl) {
+              conversationalContent = [
+                { type: 'text', text: conversationalPrompt },
+                { type: 'image_url', image_url: { url: imageUrl } }
+              ]
+            }
+
+            const conversationalCompletion = await openai.chat.completions.create({
+              model: 'gpt-4o',
+              messages: [
+                { role: 'system', content: CONVERSATIONAL_PROMPT },
+                { role: 'user', content: conversationalContent }
+              ],
+              temperature: 0.7,
+              max_tokens: 200,
+            })
+
+            conversationalResponse = conversationalCompletion.choices[0]?.message?.content || ''
+          }
+
+          // Send conversational response to chat
+          sendUpdate('chat', conversationalResponse)
+          await new Promise(resolve => setTimeout(resolve, 800))
+
+          // Step 2: Generate HTML
           sendUpdate('status', '✓ Designing layout structure...')
           await new Promise(resolve => setTimeout(resolve, 500))
 
@@ -596,8 +680,6 @@ export async function POST(request: Request) {
 
           let generatedHTML: string | null = null
 
-          // Determine if this is an update or initial generation
-          const isUpdate = currentHTML && conversationHistory.length > 0
           const userPrompt = isUpdate
             ? `The user wants to update the existing landing page. Current HTML:\n\n${currentHTML}\n\nUser's update request: ${prompt}\n\nModify ONLY what the user requested while keeping everything else the same. Return the complete updated HTML file.`
             : `Generate a landing page for: ${prompt}`
