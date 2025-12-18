@@ -957,6 +957,9 @@ function GeneratePageContent() {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+
+    // Clear generatedHTML to show "being built" state for updates
+    setGeneratedHTML('')
     setIsGenerating(true)
 
     // Create AI message that will be updated with streaming content
