@@ -181,16 +181,23 @@ COMPONENT STRUCTURE (USE EXACTLY THIS)
    Structure:
    <nav class="fixed top-0 left-0 right-0 h-20 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
      <div class="max-w-7xl mx-auto px-6 md:px-12 h-full flex items-center justify-between">
-       <div class="text-2xl font-bold">Brand Name</div>
+       <div class="text-2xl font-bold">BRAND_NAME_HERE</div>
        <div class="hidden md:flex items-center gap-8">
-         <a href="#features">Features</a>
-         <a href="#pricing">Pricing</a>
+         <a href="#features" class="hover:text-blue-400 transition-colors">Features</a>
+         <a href="#pricing" class="hover:text-blue-400 transition-colors">Pricing</a>
        </div>
-       <button class="px-6 py-3 bg-white text-black rounded-xl font-semibold hover:bg-gray-100">
+       <button class="px-6 py-3 bg-white text-black rounded-xl font-semibold hover:bg-gray-100 transition-all">
          Get Started
        </button>
      </div>
    </nav>
+
+   CRITICAL: Replace "BRAND_NAME_HERE" with the actual brand/product name from the user's prompt.
+   Examples:
+   - If prompt is "Build a SaaS app called Vortext" → use "Vortext"
+   - If prompt is "Create a landing page for GolfnGo" → use "GolfnGo"
+   - If prompt is "Make a Stripe clone" → use "Stripe Clone"
+   - If no specific name, extract from context or use a relevant name based on the product type
 
 2. HERO SECTION (STUNNING & DYNAMIC - First section, offset for navbar)
    Structure Option A - Split Hero with Image:
@@ -691,35 +698,67 @@ OUTPUT FORMAT
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Smooth scroll for anchor links (navbar links)
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  (function() {
+    // Wait for DOM to be fully loaded
+    function initNavigation() {
+      // Smooth scroll for anchor links (navbar links like #features, #pricing)
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          var href = this.getAttribute('href');
+          var target = document.querySelector(href);
+
+          if (target) {
+            // Smooth scroll to target
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+
+          return false;
+        });
+      });
+
+      // Prevent all external links from opening (keep users in preview)
+      document.querySelectorAll('a:not([href^="#"])').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        });
+      });
+
+      // Prevent form submissions
+      document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        });
+      });
+
+      // Prevent all buttons from doing anything except scrolling
+      document.querySelectorAll('button:not([type="submit"])').forEach(function(button) {
+        if (!button.getAttribute('onclick')) {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          });
         }
       });
-    });
+    }
 
-    // Prevent all external links from opening (keep users in preview)
-    document.querySelectorAll('a:not([href^="#"])').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    });
-
-    // Prevent form submissions
-    document.querySelectorAll('form').forEach(form => {
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    });
-  });
+    // Run on DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initNavigation);
+    } else {
+      initNavigation();
+    }
+  })();
 </script>
 </body>
 </html>
