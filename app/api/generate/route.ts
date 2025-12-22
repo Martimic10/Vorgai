@@ -601,6 +601,7 @@ OUTPUT FORMAT
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_self">
   <title>Relevant Title</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -699,72 +700,123 @@ OUTPUT FORMAT
 
 <script>
   (function() {
-    // Wait for DOM to be fully loaded
-    function initNavigation() {
-      // Override default anchor behavior to prevent parent frame navigation
-      document.querySelectorAll('a').forEach(function(anchor) {
-        var href = anchor.getAttribute('href');
+    'use strict';
 
-        // Handle internal anchor links (#features, #pricing, etc.)
+    // Aggressive prevention - run IMMEDIATELY
+    function preventNavigation(e) {
+      var target = e.target;
+
+      // Find the closest anchor tag
+      while (target && target.tagName !== 'A') {
+        target = target.parentElement;
+      }
+
+      if (target && target.tagName === 'A') {
+        var href = target.getAttribute('href');
+
+        // If it's a hash link, scroll to it
         if (href && href.startsWith('#')) {
-          anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
 
-            var targetId = href.substring(1);
-            var target = document.getElementById(targetId);
+          var targetId = href.substring(1);
+          var targetElement = document.getElementById(targetId);
 
-            if (target) {
-              // Smooth scroll to target within this document
-              target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-                inline: 'nearest'
-              });
-            }
+          if (targetElement) {
+            // Force scroll within this window
+            window.scrollTo({
+              top: targetElement.offsetTop,
+              behavior: 'smooth'
+            });
+          }
 
-            return false;
-          }, true); // Use capture phase
+          return false;
         }
-        // Handle all other links (external, non-hash)
-        else if (href && !href.startsWith('#')) {
-          anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-          }, true); // Use capture phase
+        // Block all other links
+        else {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          return false;
         }
-      });
+      }
 
       // Prevent form submissions
-      document.querySelectorAll('form').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
+      if (target && target.tagName === 'FORM') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+
+      // Prevent buttons (except Vorg badge)
+      if (target && target.tagName === 'BUTTON') {
+        if (!target.closest('#vorg-badge-wrapper')) {
           e.preventDefault();
           e.stopPropagation();
+          e.stopImmediatePropagation();
           return false;
-        }, true); // Use capture phase
-      });
+        }
+      }
+    }
 
-      // Prevent all buttons from doing anything
-      document.querySelectorAll('button').forEach(function(button) {
-        button.addEventListener('click', function(e) {
-          // Don't prevent Vorg badge click
-          if (this.closest('#vorg-badge-wrapper')) {
-            return;
+    // Install listeners immediately
+    document.addEventListener('click', preventNavigation, true);
+
+    // Also override all anchor default behavior
+    function disableLinks() {
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        // Store original href
+        var originalHref = anchor.getAttribute('href');
+
+        // Remove href to prevent default navigation
+        anchor.removeAttribute('href');
+
+        // Store in data attribute
+        anchor.setAttribute('data-scroll-to', originalHref);
+
+        // Make it look like a link
+        anchor.style.cursor = 'pointer';
+
+        // Add click handler
+        anchor.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          var targetId = this.getAttribute('data-scroll-to').substring(1);
+          var targetElement = document.getElementById(targetId);
+
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop,
+              behavior: 'smooth'
+            });
           }
+
+          return false;
+        };
+      });
+
+      // Block all non-hash links
+      document.querySelectorAll('a:not([data-scroll-to])').forEach(function(anchor) {
+        anchor.onclick = function(e) {
           e.preventDefault();
           e.stopPropagation();
           return false;
-        }, true); // Use capture phase
+        };
       });
     }
 
-    // Run as early as possible
+    // Run immediately and on DOM ready
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initNavigation);
+      document.addEventListener('DOMContentLoaded', disableLinks);
     } else {
-      initNavigation();
+      disableLinks();
     }
+
+    // Run again after a short delay to catch dynamically added elements
+    setTimeout(disableLinks, 100);
   })();
 </script>
 </body>
