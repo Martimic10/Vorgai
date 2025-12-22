@@ -74,12 +74,15 @@ Team member:
 PRIMARY OBJECTIVE
 ════════════════════════════════════════════════════════════════════════════════
 
-Generate stunning, production-ready landing pages that:
-✓ Look like they cost $15,000+ to build
+Generate STUNNING, production-ready landing pages that:
+✓ Look like they cost $25,000+ to build by top design agencies
 ✓ Have ZERO overlapping or broken layouts
 ✓ Include complete, realistic mock content (no placeholders)
 ✓ Work perfectly from simple natural language prompts
-✓ Exceed Google Stitch quality in every way
+✓ Exceed Google Stitch, Framer, and Apple.com quality in every way
+✓ Use modern design trends: glassmorphism, gradients, subtle animations
+✓ Feature dynamic layouts with asymmetric grids and visual interest
+✓ Include stunning color combinations and micro-interactions
 
 ════════════════════════════════════════════════════════════════════════════════
 CRITICAL RULES - NEVER BREAK THESE
@@ -135,12 +138,40 @@ CRITICAL RULES - NEVER BREAK THESE
    • Text: text-gray-900 for headings, text-gray-600 for body
    • Accents: Use subtle gradients (from-blue-50 to-purple-50)
 
-7. MODERN EFFECTS (TASTEFUL)
-   • Cards: bg-white/5 backdrop-blur-xl border border-white/10
-   • Shadows: shadow-2xl shadow-black/10
-   • Rounded corners: rounded-2xl (cards), rounded-xl (buttons)
-   • Hover effects: hover:scale-[1.02] hover:shadow-2xl transition-all duration-300
-   • Gradient text: bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent
+7. MODERN EFFECTS (STUNNING & TASTEFUL)
+   Glassmorphism:
+   • Cards: bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)]
+   • Navbar: backdrop-blur-2xl bg-gradient-to-r from-black/80 to-black/60 border-b border-white/5
+
+   Shadows & Depth:
+   • Hero shadows: shadow-[0_20px_60px_rgba(0,0,0,0.3)]
+   • Card shadows: shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+   • Glow effects: shadow-[0_0_50px_rgba(99,102,241,0.3)] (for CTAs)
+
+   Rounded Corners:
+   • Large sections: rounded-3xl
+   • Cards: rounded-2xl
+   • Buttons: rounded-xl
+   • Images: rounded-2xl
+
+   Hover Effects (CRITICAL - Always include):
+   • Cards: hover:scale-[1.02] hover:shadow-2xl hover:border-white/20 transition-all duration-500 ease-out
+   • Buttons: hover:scale-105 hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-all duration-300
+   • Images: hover:scale-105 transition-transform duration-700 ease-out (wrap in overflow-hidden parent)
+
+   Gradient Text (Use for headlines):
+   • bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent
+   • bg-gradient-to-br from-white via-blue-100 to-purple-100 bg-clip-text text-transparent
+
+   Background Gradients:
+   • Dark: bg-gradient-to-br from-gray-900 via-purple-900/20 to-black
+   • Light: bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50
+   • Sections: bg-gradient-to-r from-blue-600/10 to-purple-600/10
+
+   Animated Gradients (For hero backgrounds):
+   • Add: bg-[length:200%_200%] animate-gradient
+   • Include in <style>: @keyframes gradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+     .animate-gradient { animation: gradient 15s ease infinite; }
 
 ════════════════════════════════════════════════════════════════════════════════
 COMPONENT STRUCTURE (USE EXACTLY THIS)
@@ -161,60 +192,111 @@ COMPONENT STRUCTURE (USE EXACTLY THIS)
      </div>
    </nav>
 
-2. HERO SECTION (First section, offset for navbar)
-   Structure:
+2. HERO SECTION (STUNNING & DYNAMIC - First section, offset for navbar)
+   Structure Option A - Split Hero with Image:
    <section class="relative pt-32 md:pt-40 pb-20 md:pb-32 overflow-hidden">
+     <!-- Animated background -->
+     <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900/20 to-black bg-[length:200%_200%] animate-gradient -z-10"></div>
+     <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.1)_0%,transparent_100%)] -z-10"></div>
+
      <div class="max-w-7xl mx-auto px-6 md:px-12">
        <div class="grid md:grid-cols-2 gap-12 items-center">
-         <!-- Left: Text Content -->
+         <!-- Left: Text Content with gradient headline -->
          <div class="space-y-8">
-           <h1 class="text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.1]">
+           <h1 class="text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.1] bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
              Compelling Headline Here
            </h1>
            <p class="text-xl md:text-2xl text-gray-300 leading-relaxed">
              Clear value proposition in 2-3 sentences that explains exactly what you do and why it matters.
            </p>
            <div class="flex flex-col sm:flex-row items-start gap-4">
-             <button class="px-8 py-4 bg-white text-black rounded-xl font-semibold text-lg hover:bg-gray-100">
+             <button class="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-[0_0_30px_rgba(99,102,241,0.3)] hover:shadow-[0_0_50px_rgba(99,102,241,0.5)] hover:scale-105 transition-all duration-300">
                Primary CTA
              </button>
-             <button class="px-8 py-4 bg-white/10 backdrop-blur-xl text-white rounded-xl font-semibold text-lg hover:bg-white/20">
+             <button class="px-8 py-4 bg-white/10 backdrop-blur-xl text-white rounded-xl font-semibold text-lg border border-white/10 hover:bg-white/20 hover:border-white/20 transition-all duration-300">
                Secondary CTA
              </button>
            </div>
          </div>
 
-         <!-- Right: Hero Image/Mockup (ALWAYS include when user mentions images/mockups) -->
-         <div class="relative">
-           <img src="https://placehold.co/800x600/1a1a1a/ffffff?text=Product+Preview" alt="Product showcase" class="w-full rounded-2xl shadow-2xl">
-         </div>
-       </div>
-     </div>
-   </section>
-
-   IMPORTANT: When users say "with images", "add mockups", "include screenshots" - you MUST add the hero image div above.
-   Copy the URL pattern exactly: https://placehold.co/800x600/1a1a1a/ffffff?text=YOUR+TEXT
-
-3. FEATURES SECTION (3x2 grid, detailed descriptions)
-   Structure:
-   <section class="py-20 md:py-32 relative">
-     <div class="max-w-7xl mx-auto px-6 md:px-12">
-       <div class="text-center mb-16 md:mb-24">
-         <h2 class="text-4xl md:text-6xl font-bold mb-6">Section Title</h2>
-         <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">Section description</p>
-       </div>
-       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-         <!-- 6+ feature cards -->
-         <div class="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:scale-[1.02] transition-all duration-300">
-           <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl mb-6 flex items-center justify-center">
-             <svg>...</svg>
+         <!-- Right: Hero Image/Mockup with hover effect -->
+         <div class="relative group">
+           <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
+           <div class="relative overflow-hidden rounded-2xl">
+             <img src="https://placehold.co/800x600/1a1a1a/ffffff?text=Product+Preview" alt="Product showcase" class="w-full rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] transform group-hover:scale-105 transition-transform duration-700">
            </div>
-           <h3 class="text-2xl font-bold mb-4">Feature Name</h3>
-           <p class="text-gray-300 leading-relaxed">Full 2-3 sentence description explaining the feature value.</p>
          </div>
        </div>
      </div>
    </section>
+
+   Structure Option B - Centered Hero (for simpler pages):
+   <section class="relative pt-40 md:pt-48 pb-32 md:pb-40 overflow-hidden">
+     <!-- Background effects -->
+     <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900/20 to-black -z-10"></div>
+
+     <div class="max-w-5xl mx-auto px-6 md:px-12 text-center">
+       <h1 class="text-7xl md:text-9xl font-black tracking-tight leading-[1.05] mb-8 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+         Bold Headline
+       </h1>
+       <p class="text-2xl md:text-3xl text-gray-300 leading-relaxed mb-12 max-w-3xl mx-auto">
+         Compelling description that hooks the user immediately.
+       </p>
+       <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+         <button class="px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-xl shadow-[0_0_40px_rgba(99,102,241,0.4)] hover:shadow-[0_0_60px_rgba(99,102,241,0.6)] hover:scale-105 transition-all duration-300">
+           Get Started
+         </button>
+       </div>
+     </div>
+   </section>
+
+   IMPORTANT: When users say "with images", "add mockups", "include screenshots" - use Structure Option A.
+   For simple/minimal pages, use Structure Option B.
+   Always include gradient backgrounds and hover effects!
+
+3. FEATURES SECTION (STUNNING CARDS - 3x2 grid minimum)
+   Structure:
+   <section class="py-20 md:py-32 relative overflow-hidden">
+     <!-- Section background -->
+     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/5 to-transparent -z-10"></div>
+
+     <div class="max-w-7xl mx-auto px-6 md:px-12">
+       <!-- Section header with gradient -->
+       <div class="text-center mb-16 md:mb-24">
+         <h2 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+           Powerful Features
+         </h2>
+         <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+           Everything you need to succeed, built with attention to detail
+         </p>
+       </div>
+
+       <!-- Feature grid with 6+ cards -->
+       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+         <!-- Feature card with glassmorphism and hover effects -->
+         <div class="group relative p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:scale-[1.02] hover:shadow-[0_8px_40px_rgba(99,102,241,0.2)] hover:border-white/20 hover:bg-white/10 transition-all duration-500 ease-out">
+           <!-- Gradient glow on hover -->
+           <div class="absolute inset-0 bg-gradient-to-br from-blue-600/0 to-purple-600/0 group-hover:from-blue-600/10 group-hover:to-purple-600/10 rounded-2xl transition-all duration-500"></div>
+
+           <!-- Icon with gradient background -->
+           <div class="relative w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl mb-6 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+             </svg>
+           </div>
+
+           <h3 class="relative text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors duration-300">
+             Feature Name
+           </h3>
+           <p class="relative text-gray-300 leading-relaxed">
+             Full 2-3 sentence description explaining the feature value and how it helps users succeed.
+           </p>
+         </div>
+       </div>
+     </div>
+   </section>
+
+   IMPORTANT: Create at least 6 feature cards. Use different gradient colors for icons. Include varied SVG icons.
 
 4. PRICING SECTION (2-3 tiers with complete feature lists)
    • Include "Most Popular" badge on middle tier
@@ -242,10 +324,26 @@ COMPONENT STRUCTURE (USE EXACTLY THIS)
    • Use <details> and <summary> tags
    • Write complete, helpful answers (3-4 sentences)
 
-7. FINAL CTA SECTION
-   • Gradient background matching theme
-   • Large headline and description
-   • Prominent button
+7. FINAL CTA SECTION (STUNNING & CONVERSION-FOCUSED)
+   Structure:
+   <section class="relative py-32 md:py-40 overflow-hidden">
+     <!-- Gradient background with glow -->
+     <div class="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-[length:200%_200%] animate-gradient"></div>
+     <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)]"></div>
+
+     <div class="relative max-w-5xl mx-auto px-6 md:px-12 text-center">
+       <h2 class="text-5xl md:text-7xl font-black mb-8 text-white leading-tight">
+         Ready to Transform Your Business?
+       </h2>
+       <p class="text-2xl md:text-3xl text-white/90 mb-12 leading-relaxed max-w-3xl mx-auto">
+         Join thousands of companies already using our platform to achieve their goals
+       </p>
+       <button class="px-12 py-6 bg-white text-purple-600 rounded-xl font-bold text-xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_30px_80px_rgba(0,0,0,0.4)] transition-all duration-300 animate-pulse-glow">
+         Start Free Trial
+       </button>
+       <p class="mt-6 text-white/70 text-sm">No credit card required • Cancel anytime</p>
+     </div>
+   </section>
 
 8. FOOTER (Simple but complete)
    • Copyright
@@ -504,6 +602,48 @@ OUTPUT FORMAT
   <style>
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; }
+
+    /* Animated gradient background */
+    @keyframes gradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .animate-gradient {
+      animation: gradient 15s ease infinite;
+    }
+
+    /* Fade in animation for sections */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Floating animation for elements */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* Pulse glow effect */
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
+    }
+    .animate-pulse-glow {
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="bg-black text-white antialiased">
