@@ -997,7 +997,10 @@ function GeneratePageContent() {
         }),
       })
 
-      if (!response.ok) throw new Error('Failed to generate')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Server error: ${response.status}`)
+      }
 
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
@@ -1043,11 +1046,12 @@ function GeneratePageContent() {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Generation error:', error)
+      const errorMessage = error?.message || 'Unknown error'
       setMessages(prev => prev.map(msg =>
         msg.id === aiMessageId
-          ? { ...msg, content: 'Failed to update landing page. Please try again.' }
+          ? { ...msg, content: `Failed to update landing page: ${errorMessage}. Please try again.` }
           : msg
       ))
     } finally {
