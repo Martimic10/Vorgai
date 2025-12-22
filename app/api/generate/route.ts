@@ -701,34 +701,39 @@ OUTPUT FORMAT
   (function() {
     // Wait for DOM to be fully loaded
     function initNavigation() {
-      // Smooth scroll for anchor links (navbar links like #features, #pricing)
-      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-        anchor.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
+      // Override default anchor behavior to prevent parent frame navigation
+      document.querySelectorAll('a').forEach(function(anchor) {
+        var href = anchor.getAttribute('href');
 
-          var href = this.getAttribute('href');
-          var target = document.querySelector(href);
+        // Handle internal anchor links (#features, #pricing, etc.)
+        if (href && href.startsWith('#')) {
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-          if (target) {
-            // Smooth scroll to target
-            target.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
+            var targetId = href.substring(1);
+            var target = document.getElementById(targetId);
 
-          return false;
-        });
-      });
+            if (target) {
+              // Smooth scroll to target within this document
+              target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+                inline: 'nearest'
+              });
+            }
 
-      // Prevent all external links from opening (keep users in preview)
-      document.querySelectorAll('a:not([href^="#"])').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        });
+            return false;
+          }, true); // Use capture phase
+        }
+        // Handle all other links (external, non-hash)
+        else if (href && !href.startsWith('#')) {
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }, true); // Use capture phase
+        }
       });
 
       // Prevent form submissions
@@ -737,22 +742,24 @@ OUTPUT FORMAT
           e.preventDefault();
           e.stopPropagation();
           return false;
-        });
+        }, true); // Use capture phase
       });
 
-      // Prevent all buttons from doing anything except scrolling
-      document.querySelectorAll('button:not([type="submit"])').forEach(function(button) {
-        if (!button.getAttribute('onclick')) {
-          button.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-          });
-        }
+      // Prevent all buttons from doing anything
+      document.querySelectorAll('button').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+          // Don't prevent Vorg badge click
+          if (this.closest('#vorg-badge-wrapper')) {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }, true); // Use capture phase
       });
     }
 
-    // Run on DOMContentLoaded
+    // Run as early as possible
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initNavigation);
     } else {
@@ -1066,15 +1073,22 @@ export async function POST(request: Request) {
 
           // Remove Vorg badge for paid plans
           if (isPaidPlan) {
-            // Remove the entire badge section - from comment to closing script tag
-            // This matches: <!-- VORG BADGE (Required) --> ... </script>
+            // Remove the entire badge section: comment + div + style + script
+            // The badge section structure:
+            // <!-- VORG BADGE (Required) -->
+            // <div id="vorg-badge-wrapper">...</div>
+            // <style>...</style>
+            // <script>...</script>
+
+            // Match from comment through all three elements (div, style, script)
             generatedHTML = generatedHTML.replace(
-              /<!--\s*VORG BADGE[\s\S]*?<\/script>\s*(?=\n)/gi,
+              /<!--\s*VORG\s+BADGE[\s\S]*?<\/div>\s*\n<style>[\s\S]*?<\/style>\s*\n<script>[\s\S]*?<\/script>\s*\n/gi,
               ''
             )
-            // Also try alternative format with "Made with Vorg Badge" comment
+
+            // Fallback: If the comment doesn't exist, match by div ID
             generatedHTML = generatedHTML.replace(
-              /<!--\s*Made with Vorg Badge\s*-->[\s\S]*?<\/script>\s*(?=\n)/gi,
+              /<div\s+id="vorg-badge-wrapper"[\s\S]*?<\/div>\s*\n<style>[\s\S]*?<\/style>\s*\n<script>[\s\S]*?<\/script>\s*\n/gi,
               ''
             )
           }
