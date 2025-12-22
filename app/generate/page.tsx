@@ -952,6 +952,7 @@ function GeneratePageContent() {
     setMessages(prev => [...prev, userMessage])
     const userPrompt = inputValue
     const imageToSend = uploadedImage
+    const currentPageHTML = generatedHTML // Save current HTML before clearing
     setInputValue('')
     setUploadedImage(null)
     if (fileInputRef.current) {
@@ -981,14 +982,18 @@ function GeneratePageContent() {
           content: msg.content
         }))
 
+      // Determine if this is an update (has existing HTML and conversation)
+      const isUpdate = !!currentPageHTML && conversationHistory.length > 0
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: userPrompt,
           conversationHistory,
-          currentHTML: generatedHTML, // Pass current HTML for incremental updates
-          imageUrl: imageToSend // Pass uploaded image if available
+          currentHTML: currentPageHTML, // Pass current HTML for incremental updates
+          imageUrl: imageToSend, // Pass uploaded image if available
+          isUpdate // Explicitly tell backend this is an update
         }),
       })
 
