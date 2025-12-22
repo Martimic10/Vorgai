@@ -24,6 +24,20 @@ const DESIGN_SYSTEM_PROMPT = `You are Vorg, an elite AI landing page generator t
 
 CRITICAL: Every output must be pixel-perfect with ZERO overlapping elements, proper z-index management, and complete realistic content.
 
+MANDATORY: You MUST ALWAYS generate the COMPLETE landing page including ALL sections:
+- Navigation bar (if appropriate for the design)
+- Hero section with compelling headline and CTA
+- Features section (minimum 6 feature cards)
+- Pricing section (2-3 tiers with complete feature lists)
+- Testimonials section (3+ customer reviews)
+- FAQ section (5-7 questions with full answers)
+- Final CTA section
+- Footer with links
+- The Vorg badge (REQUIRED - do not skip)
+- ALL JavaScript including navigation and badge handlers
+
+NEVER stop generating early. NEVER cut off sections mid-way. If you're approaching token limits, prioritize completing ALL sections over verbose content. Every section listed above is MANDATORY.
+
 IMAGES: CRITICAL - When users mention "images", "mockups", "photos", "avatars", "screenshots", etc., you MUST include actual working image URLs using these services:
 
 WORKING PLACEHOLDER SERVICES (COPY THESE EXACTLY):
@@ -699,125 +713,47 @@ OUTPUT FORMAT
 </script>
 
 <script>
-  (function() {
-    'use strict';
+  // Simple, direct navigation handling
+  document.addEventListener('click', function(e) {
+    var target = e.target;
 
-    // Aggressive prevention - run IMMEDIATELY
-    function preventNavigation(e) {
-      var target = e.target;
+    // Find if we clicked on or inside an anchor
+    while (target && target.tagName !== 'A') {
+      target = target.parentElement;
+      if (!target) break;
+    }
 
-      // Find the closest anchor tag
-      while (target && target.tagName !== 'A') {
-        target = target.parentElement;
-      }
+    if (target && target.tagName === 'A') {
+      var href = target.getAttribute('href');
 
-      if (target && target.tagName === 'A') {
-        var href = target.getAttribute('href');
-
-        // If it's a hash link, scroll to it
-        if (href && href.startsWith('#')) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-
-          var targetId = href.substring(1);
-          var targetElement = document.getElementById(targetId);
-
-          if (targetElement) {
-            // Force scroll within this window
-            window.scrollTo({
-              top: targetElement.offsetTop,
-              behavior: 'smooth'
-            });
-          }
-
-          return false;
-        }
-        // Block all other links
-        else {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-      }
-
-      // Prevent form submissions
-      if (target && target.tagName === 'FORM') {
+      // Handle hash links (smooth scroll)
+      if (href && href.charAt(0) === '#') {
         e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
+        var id = href.slice(1);
+        var element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         return false;
       }
 
-      // Prevent buttons (except Vorg badge)
-      if (target && target.tagName === 'BUTTON') {
-        if (!target.closest('#vorg-badge-wrapper')) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          return false;
-        }
-      }
+      // Block all other links
+      e.preventDefault();
+      return false;
     }
 
-    // Install listeners immediately
-    document.addEventListener('click', preventNavigation, true);
-
-    // Also override all anchor default behavior
-    function disableLinks() {
-      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-        // Store original href
-        var originalHref = anchor.getAttribute('href');
-
-        // Remove href to prevent default navigation
-        anchor.removeAttribute('href');
-
-        // Store in data attribute
-        anchor.setAttribute('data-scroll-to', originalHref);
-
-        // Make it look like a link
-        anchor.style.cursor = 'pointer';
-
-        // Add click handler
-        anchor.onclick = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          var targetId = this.getAttribute('data-scroll-to').substring(1);
-          var targetElement = document.getElementById(targetId);
-
-          if (targetElement) {
-            window.scrollTo({
-              top: targetElement.offsetTop,
-              behavior: 'smooth'
-            });
-          }
-
-          return false;
-        };
-      });
-
-      // Block all non-hash links
-      document.querySelectorAll('a:not([data-scroll-to])').forEach(function(anchor) {
-        anchor.onclick = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        };
-      });
+    // Prevent form submissions
+    if (target && target.tagName === 'FORM') {
+      e.preventDefault();
+      return false;
     }
 
-    // Run immediately and on DOM ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', disableLinks);
-    } else {
-      disableLinks();
+    // Prevent button clicks (except Vorg badge)
+    if (target && target.tagName === 'BUTTON' && !target.closest('#vorg-badge-wrapper')) {
+      e.preventDefault();
+      return false;
     }
-
-    // Run again after a short delay to catch dynamically added elements
-    setTimeout(disableLinks, 100);
-  })();
+  }, true);
 </script>
 </body>
 </html>
@@ -1074,7 +1010,7 @@ export async function POST(request: Request) {
             // Generate with Claude
             const response = await anthropic.messages.create({
               model: 'claude-sonnet-4-20250514',
-              max_tokens: 4000,
+              max_tokens: 8000,
               system: DESIGN_SYSTEM_PROMPT,
               messages: claudeMessages,
               temperature: 0.7,
@@ -1110,7 +1046,7 @@ export async function POST(request: Request) {
               model: 'gpt-4o',
               messages: openaiMessages,
               temperature: 0.7,
-              max_tokens: 4000,
+              max_tokens: 8000,
             })
 
             generatedHTML = completion.choices[0]?.message?.content
